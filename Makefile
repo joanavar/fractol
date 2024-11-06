@@ -6,7 +6,7 @@
 #    By: joanavar <joanavar@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/29 21:12:52 by joanavar          #+#    #+#              #
-#    Updated: 2024/05/31 20:30:34 by joanavar         ###   ########.fr        #
+#    Updated: 2024/07/31 17:27:23 by joanavar         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,19 +17,18 @@ RM 			= 		rm -f
 #									COMPILER								  #
 ###############################################################################
 
-CC 		= 		gcc
-CCFLAGS	= 		#-Wall -Wextra -Werror
-#LDFLAGS = 		-L./Libreries/ft_printf -ft_printf -L./Libreries/libft -libft \
-			    -L./Libreries/minilibx -minilibx -lm
+CC 		= 	gcc
+CFLAGS  = -Wall -Wextra -Werror -I/usr/include -Imlx_linux -O3
+LFLAGS  = -Lmlx_linux -lmlx_Linux -L/usr/lib -Imlx_linux -lXext -lX11 -lm -lz
 
 ###############################################################################
 #									SRC										  #
 ###############################################################################
 
-SRC 	= 	events.c fractol.c init.c math_utils.c rende.c utils.c #first.c 
-
-OBJ 	= 		$(SRC:.c=.o)
-OBJ2 	= 		$(SRC:.c=.d)
+SRC 	= events.c fractol.c init.c math_utils.c rende.c utils.c  
+OBJ 	= $(SRC:.c=.o)
+OBJ_D	= $(SRC:.c=.d)
+HEADER	= fractol.h
 
 ###############################################################################
 #						          SRC BONUS			   						  #
@@ -47,22 +46,24 @@ OBJ2 	= 		$(SRC:.c=.d)
 #									RULES									  #
 ###############################################################################
 
-all: $(NAME)
+%.o: %.c $(HEADER) Makefile mlx_linux/libmlx_Linux.a
+	$(CC) $(CCFLAGS) -c $< -o $@
+
+all: make_libs $(NAME) 
+
+make_libs:
+	@make -C mlx_linux --no-print-directory
 
 $(NAME): $(OBJ)
-	$(CC) $(CCFLAGS) -framework OpenGL -framework AppKit $(OBJ) libmlx.a -o $(NAME)
-
-%.o: %.c Makefile fractol.h
-	$(CC) $(CCFLAGS) -MMD -Imlx -c $< -o $@
+	$(CC) $(OBJ) $(LFLAGS) -o $(NAME)
 
 clean:
-	$(RM) $(OBJ) $(BONUSOBJ)
+	$(RM) $(OBJ) $(OBJ_D)
+	@make clean -C ./mlx_linux
 
 fclean: clean
-	$(RM) $(NAME) $(OBJ2)
+	$(RM) $(NAME)
 
 re: fclean all
-
-rebonus: fclean bonus
 
 .PHONY: all clean fclean re
